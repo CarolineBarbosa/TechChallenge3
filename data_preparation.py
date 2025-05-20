@@ -24,16 +24,6 @@ def prepare_training_data():
     export_filtered_data(df, OUTPUT_PATH, DATE_CUTOFF)
 
 
-# def prepare_training_data():
-#     df = load_data(INPUT_FOLDER)
-#     df = add_datetime_features(df)
-#     df = df.drop(['data_hora_gmt', 'pais', 'pais_id'], axis=1)
-#     df = df[df['risco_fogo'] > 0]
-#     df = fill_and_engineer_features(df)
-#     df = encode_categoricals(df)
-#     df = filter_columns(df)
-#     export_filtered_data(df, OUTPUT_PATH, DATE_CUTOFF)
-
 
 def load_from_folder(folder_path: str) -> pd.DataFrame:
     all_files = sorted([f for f in os.listdir(folder_path) if f.endswith(".csv")])

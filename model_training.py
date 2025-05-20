@@ -5,6 +5,7 @@ from models import get_models
 import joblib
 
 INPUT_FILE = "prepared_data/data_prepared.parquet"
+MODEL_OUTPUT_PATH = "models/fire_risk_model_v1.joblib"
 
 
 def select_model_pipeline():
@@ -28,8 +29,8 @@ def split_train_val(df):
     df = df.sort_values(by="day_of_year")
     unique_days = df["day_of_year"].unique()
     split_day = sorted(unique_days)[-30]  # Last month = last 30 days
-    train_df = df[df["day_of_year"] < split_day]
-    val_df = df[df["day_of_year"] >= split_day]
+    train_df = df[~((df["day_of_year"] >= split_day) & (df["year"] == 2025))]
+    val_df = df[(df["day_of_year"] >= split_day) & (df["year"] == 2025)]
 
     X_train = train_df.drop(columns=["risco_fogo"])
     y_train = train_df["risco_fogo"]
@@ -74,9 +75,9 @@ def find_best_model(models, X_train, X_val, y_train, y_val):
 
 
 def save_best_model(model, model_name):
-    file_name = "fire_risk_model_v1.pkl"
-    joblib.dump(model, file_name)
-    print(f"✅ Best model ({model_name}) saved to {file_name}")
+    joblib.dump(model, MODEL_OUTPUT_PATH)
+    model.to_pickle('model/model.pkl')
+    print(f"✅ Best model ({model_name}) saved to {MODEL_OUTPUT_PATH}")
 
 if __name__ == "__main__":
     select_model_pipeline()
