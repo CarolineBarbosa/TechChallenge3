@@ -4,7 +4,6 @@ from bs4 import BeautifulSoup
 import pandas as pd
 from urllib.parse import urljoin
 from typing import List
-from datetime import datetime
 
 
 def ensure_directory(path: str) -> None:
@@ -53,29 +52,45 @@ def download_and_save_csvs(csv_urls: List[str], save_dir: str, max_files: int = 
         df.to_csv(full_path, index=False)
         print(f"Saved to: {full_path}")
 
+def check_file_exists(save_path, reference_date_formatted):
+    """
+    Check if a file with the reference_date_formatted in its name exists in the given path.
 
-def main() -> None:
+    Args:
+        save_path: The directory to check for the file.
+        reference_date_formatted: The date string to look for in file names.
+
+    Returns:
+        True if a matching file exists, False otherwise.
+    """
+    for filename in os.listdir(save_path):
+        if reference_date_formatted in filename:
+            return True
+    return False
+
+
+def scrape_and_collect_data(reference_date_formatted: str) -> None:
+    """
+    Scrape and collect CSV files for a given reference date.
+
+    Args:
+        reference_date: The reference date in the format DD-MM-YYYY.
+    """
     BASE_URL = "https://dataserver-coids.inpe.br/queimadas/queimadas/focos/csv/diario/Brasil/"
-    input_date = "01-05-2025"  # Format: DD-MM-YYYY
     save_path = "daily_data/"
 
-    # Convert input date to YYYYMMDD format
-    try:
-        reference_date = datetime.strptime(input_date, "%d-%m-%Y").strftime("%Y%m%d")
-    except ValueError:
-        print("Invalid date format. Please use 'DD-MM-YYYY'.")
-        return
+    # Convert reference_date to the required format YYYYMMDD
 
     ensure_directory(save_path)
+    if check_file_exists(save_path, reference_date_formatted):
+        print(f"File for date {reference_date_formatted} already exists in the directory.")
+        return
     try:
-        csv_links = fetch_csv_links(BASE_URL, reference_date)
+        csv_links = fetch_csv_links(BASE_URL, reference_date_formatted)
         if not csv_links:
-            print(f"No CSV files found for date {reference_date}.")
+            print(f"No CSV files found for date {reference_date_formatted}.")
             return
         download_and_save_csvs(csv_links, save_path)
     except requests.RequestException as e:
         print(f"Error fetching data: {e}")
 
-
-if __name__ == "__main__":
-    main()
