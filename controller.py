@@ -16,6 +16,27 @@ with open("model/fire_risk_model_v1.joblib", "rb") as f:
 class InputData(BaseModel):
     features: list
 
+
+@router.get("/get_data/")
+async def get_data(date: str = None):
+    """
+    Endpoint to fetch the latest fire risk data.
+    """
+    try:
+        formatted_date = pd.to_datetime(date, format="%d-%m-%Y")
+    except ValueError:
+        return {"error": "Invalid date format. Use dd-mm-yyyy."}
+    
+    formatted_date_str = formatted_date.strftime("%d-%m-%Y")
+    reference_date_formatted = "".join(reversed(formatted_date_str.split("-")))
+
+    try:
+        # Call the scrape_and_collect_data() function to fetch data
+        scrape_and_collect_data(reference_date_formatted)
+        return {"message": "Data fetched successfully."}
+    except Exception as e:
+        return {"error": f"Failed to fetch data: {str(e)}"}
+
 @router.post("/predict/")
 async def predict(date: str):
     """
