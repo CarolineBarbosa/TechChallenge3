@@ -6,6 +6,9 @@ import pandas as pd
 from scrapper import scrape_and_collect_data
 from prediction_data_preparation import prepare_daily_prediction_data
 from fastapi.responses import StreamingResponse
+from fastapi.responses import FileResponse
+import os
+
 
 router = APIRouter()
 
@@ -97,3 +100,18 @@ async def predict(date: str):
         
     except Exception as e:
         return {"error": f"Failed to process output: {str(e)}"}
+
+@router.get("/Metricas")
+def download_csv():
+    caminho_arquivo = "model_results.csv"
+
+    # Verificação de arquivo
+    if not os.path.exists(caminho_arquivo):
+        return {"erro": "Arquivo não encontrado"}
+
+    # Retorna o arquivo para download
+    return FileResponse(
+        path=caminho_arquivo,
+        media_type='text/csv',
+        filename='relatorio.csv'
+    )
