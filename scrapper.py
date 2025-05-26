@@ -4,6 +4,19 @@ from bs4 import BeautifulSoup
 import pandas as pd
 from urllib.parse import urljoin
 from typing import List
+from dotenv import load_dotenv
+from sqlalchemy import create_engine
+import glob
+
+
+load_dotenv()
+
+# PostgreSQL credentials
+pg_user = os.getenv("PG_USER")
+pg_password = os.getenv("PG_PASSWORD")
+pg_host = os.getenv("PG_HOST")
+pg_port = os.getenv("PG_PORT", "5432")
+pg_db = os.getenv("PG_DB")
 
 
 def ensure_directory(path: str) -> None:
@@ -93,4 +106,26 @@ def scrape_and_collect_data(reference_date_formatted: str) -> None:
         download_and_save_csvs(csv_links, save_path)
     except requests.RequestException as e:
         print(f"Error fetching data: {e}")
+
+def ingest_data() -> None:
+    """
+    Ingest data from the downloaded CSV files into a database.
+    """
+
+    print("Ingesting data...")
+    try:
+        engine = create_engine(f"postgresql://{pg_user}:{pg_password}@{pg_host}:{pg_port}/{pg_db}")
+
+        csv_files = glob.glob("daily_data/focos_diario_br_*.csv")
+        df_list = [pd.read_csv(f) for f in csv_files]
+        df = pd.concat(df_list, ignore_index=True)
+
+        _ = df.to_sql("queimadas", con=engine, if_exists="append", index=False)
+
+    except Exception as e:
+        raise Exception(f"Error ingesting data: {e}")
+     
+    print(f"{len(df)} registros inseridos com sucesso.")
+
+
 

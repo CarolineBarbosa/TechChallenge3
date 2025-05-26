@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from fastapi import APIRouter, UploadFile, File
 import numpy as np
 import pandas as pd
-from scrapper import scrape_and_collect_data
+from scrapper import scrape_and_collect_data, ingest_data
 from prediction_data_preparation import prepare_daily_prediction_data
 from fastapi.responses import StreamingResponse
 from fastapi.responses import FileResponse
@@ -36,7 +36,9 @@ async def get_data(date: str = None):
     try:
         # Call the scrape_and_collect_data() function to fetch data
         scrape_and_collect_data(reference_date_formatted)
+        ingest_data()
         return {"message": "Data fetched successfully."}
+    
     except Exception as e:
         return {"error": f"Failed to fetch data: {str(e)}"}
 
