@@ -5,7 +5,7 @@ from models import get_models
 import joblib
 
 INPUT_FILE = "prepared_data/data_prepared.parquet"
-MODEL_OUTPUT_PATH = "model/fire_risk_model_v1.joblib"
+MODEL_OUTPUT_PATH = "model/fire_risk_model_v2.joblib"
 
 
 def select_model_pipeline():
@@ -46,14 +46,15 @@ def split_train_val(df):
 def evaluate_model(name, model, X_val, y_val, X_train, y_train):
     y_pred = model.predict(X_val)
     ypred_1 = model.predict(X_train)
-    print(f"🔍 {name}")
-    print(f"MAE_val: {mean_absolute_error(y_val, y_pred):.4f}")
-    print(f"RMSE_val: {mean_squared_error(y_val, y_pred):.4f}")
-    print(f"MAE_train: {mean_absolute_error(y_train, ypred_1):.4f}")
-    print(f"RMSE_train: {mean_squared_error(y_train, ypred_1):.4f}")
-    print(f"R² Score_val: {r2_score(y_val, y_pred):.4f}")
-    print("-" * 40)
-    return mean_squared_error(y_val, y_pred), model
+    results = pd.DataFrame([{
+        "model_name": name,
+        "mae_val": mean_absolute_error(y_val, y_pred),
+        "rmse_val": mean_squared_error(y_val, y_pred),
+        "mae_train": mean_absolute_error(y_train, ypred_1),
+        "rmse_train": mean_squared_error(y_train, ypred_1),
+        "r2_score_val": r2_score(y_val, y_pred),
+    }])
+    return results, model
 
 def train_model(X_train, X_val, y_train, y_val):
     models = get_models()
@@ -66,15 +67,19 @@ def find_best_model(models, X_train, X_val, y_train, y_val):
     best_model = None
     best_name = ""
 
+    models_results = pd.DataFrame(columns=["model_name", "mae_val", "rmse_val", "mae_train", "rmse_train", "r2_score_val"])
     for name, model in models.items():
         print(name)
         model.fit(X_train, y_train)
-        metric, trained_model = evaluate_model(name, model, X_val, y_val, X_train, y_train)
+        results, trained_model = evaluate_model(name, model, X_val, y_val, X_train, y_train)
+       
+        metric = results["rmse_val"][0]
         if metric < best_metric:
             best_metric = metric
             best_model = trained_model
             best_name = name
-
+        models_results = pd.concat([models_results, results])
+    models_results.to_csv("model_results.csv", index=False)
     return best_model, best_name
 
 

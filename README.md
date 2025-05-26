@@ -39,7 +39,7 @@ TechChallenge3/
     - `pais_id`: Country identifier  
     - `numero_dias_sem_chuva`: Number of days without rain  
     - `precipitacao`: Precipitation levels  
-    - `risco_fogo`: Fire risk level  
+    - `risco_fogo`: Fire risk level  (Target)
     - `bioma`: Biome classification  
     - `frp`: Fire Radiative Power  
 
