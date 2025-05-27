@@ -115,5 +115,5 @@ def download_csv():
     return FileResponse(
         path=caminho_arquivo,
         media_type='text/csv',
-        filename='relatorio.csv'
+        filename='metricas.csv'
     )
