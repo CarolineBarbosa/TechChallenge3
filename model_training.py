@@ -42,7 +42,6 @@ def split_train_val(df):
 
     return X_train, X_val, y_train, y_val
 
-
 def evaluate_model(name, model, X_val, y_val, X_train, y_train):
     y_pred = model.predict(X_val)
     ypred_1 = model.predict(X_train)
@@ -60,7 +59,6 @@ def train_model(X_train, X_val, y_train, y_val):
     models = get_models()
     best_model, best_name = find_best_model(models, X_train, X_val, y_train, y_val)
     save_best_model(best_model, best_name)
-
 
 def find_best_model(models, X_train, X_val, y_train, y_val):
     best_metric = float("inf")

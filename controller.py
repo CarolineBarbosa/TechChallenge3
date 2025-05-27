@@ -103,7 +103,7 @@ async def predict(date: str):
     except Exception as e:
         return {"error": f"Failed to process output: {str(e)}"}
 
-@router.get("/Metricas")
+@router.get("/metricas")
 def download_csv():
     caminho_arquivo = "model_results.csv"
 
